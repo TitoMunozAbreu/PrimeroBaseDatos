@@ -1,0 +1,41 @@
+CREATE DATABASE IF NOT EXISTS SUBASTA;
+USE SUBASTA;
+
+CREATE TABLE IF NOT EXISTS PRODUCTO (
+codigo TINYINT(2) NOT NULL AUTO_INCREMENT,
+nombre VARCHAR (30) NOT NULL,
+descuento TINYINT (2),
+catnum_lote INT (4),
+foto BLOB,
+PRIMARY KEY (codigo),
+FOREIGN KEY (catnum_lote) REFERENCES LOTE (catnum)
+);
+
+CREATE TABLE IF NOT EXISTS LOTE (
+catnum int(4) NOT NULL AUTO_INCREMENT,
+salida INT(6),
+pujamax INT(8),
+tiempo TIME,
+PRIMARY KEY (catnum) 
+);
+
+CREATE TABLE IF NOT EXISTS CLIENTE (
+usuario VARCHAR(12) NOT NULL,
+clave VARCHAR(15) NOT NULL,
+nombre VARCHAR(30) NOT NULL,
+email VARCHAR(60),
+PRIMARY KEY (usuario)
+); 
+
+CREATE TABLE IF NOT EXISTS PUJA (
+catnum_lote INT(4) AUTO_INCREMENT NOT NULL,
+usuario_cliente VARCHAR(12),
+hora TIME,
+dia DATE,
+cantidad TINYINT(3),
+PRIMARY KEY (catnum_lote, usuario_cliente),
+FOREIGN KEY (catnum_lote) REFERENCES LOTE (catnum),
+FOREIGN KEY (usuario_cliente) REFERENCES CLIENTE (usuario)
+);
+
+
