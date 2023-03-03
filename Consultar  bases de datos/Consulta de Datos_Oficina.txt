@@ -1,0 +1,91 @@
+<!-- 1) Efectúa las inserciones para la tabla DEPARTAMENTO según las de las imágenes
+que se lista a continuación: -->
+
+START TRANSACTION;
+INSERT INTO departamentos VALUES (10, "FACTURACION", "TARRAGONA");
+INSERT INTO departamentos VALUES (20, "VENTAS", "TARRAGONA");
+INSERT INTO departamentos VALUES (30, "INFORMATICA", "VALENCIA");
+INSERT INTO departamentos VALUES (40, "INVESTIGACION", "VALENCIA");
+INSERT INTO departamentos VALUES (50, "CONTABILIDAD", "BARCELONA");
+INSERT INTO departamentos VALUES (100, "DIRECCION", "BARCELONA");
+INSERT INTO departamentos VALUES (200, "AGRICULTURA", "BARCELONA");
+COMMIT;
+
+<!-- 2) Siguiendo el mismo procedimiento anterior, haz lo mismo por la tabla EMPLEADOS 
+(no se deben especificar las columnas en la sentencia INSERT). -->
+
+START TRANSACTION;
+INSERT INTO empleados VALUES (4800,"PEPE", "COMERCIAL", 20, 14000, '1990-11-10');
+INSERT INTO empleados VALUES (5350,"JAIME", "ANALISTA", 30, 20000, '1999-10-04');
+INSERT INTO empleados VALUES (5400,"RAMON", "PROGRAMADOR", 30, 16500, '1998-12-03');
+INSERT INTO empleados VALUES (6200,"PEDRO", "DIRECTOR", 100, 24000, '1997-04-02');
+INSERT INTO empleados VALUES (7500,"RAUL", "ANALISTA", 10, 8000, '1996-01-21');
+INSERT INTO empleados VALUES (7876,"ANTONIO", "OPERARIO", 10, 12000, '1991-12-01');
+COMMIT;
+
+<!-- 3) Efectúa las inserciones en la tabla EMPLEADOS_ANTIGUOS, introduciendo los valores 
+en la cláusula VALUES en el siguiente orden: nombre, salario y código del empleado. 
+A continuación se muestra la Tabla: -->
+
+START TRANSACTION;
+INSERT INTO empleados_antiguos (NOMBRE, SALARIO, EMP_NO) VALUES ("MARGARITA", 24600, 7200);
+INSERT INTO empleados_antiguos (NOMBRE, SALARIO, EMP_NO) VALUES ("PETUNIA", 98000, 7300);
+INSERT INTO empleados_antiguos (NOMBRE, SALARIO, EMP_NO) VALUES ("LIRIO", 45000, 7400);
+COMMIT;
+
+<!-- 4) Siguiendo el mismo procedimiento, haz lo mismo para la tabla EMPLEADOS_NUEVOS, especificando las columnas en el siguiente orden: NOMBRE, SALARIO y EMP_NO. -->
+
+START TRANSACTION;
+INSERT INTO empleados_nuevos VALUES (8200, "ROSA", 15500);
+INSERT INTO empleados_nuevos VALUES (8300, "ENRIQUE", 45000);
+COMMIT;
+
+<!-- 5) La empresa ha contratado a un nuevo empleado de nombre ‘Carmen’ con código 3311 que trabajará en el departamento de informática y cobrará 21000 euros. Actualizar la base de datos para reflejar esta situación, teniendo en cuenta que a partir de ahora, por política de empresa, los nuevos empleados contratados son considerados nuevos empleados, y se añadirán a la tabla EMPLEADOS_NUEVOS.  -->
+
+START TRANSACTION;
+INSERT INTO empleados_nuevos VALUES (3311, "CARMEN", 21000);
+INSERT INTO empleados (EMP_NO, NOMBRE, SALARIO, DEPT_NO, ALTA)
+SELECT EMP_NO, NOMBRE, SALARIO, 30, CURDATE()
+FROM EMPLEADOS_NUEVOS
+WHERE EMP_NO = 3311;
+COMMIT;
+
+
+<!-- 6) La Empresa ha decidido ahora que todos los empleados nuevos (de la tabla EMPLEADOS_NUEVOS) deberán incluirse también en la tabla EMPLEADOS, es decir, hay que añadir a la tabla EMPLEADOS todos los empleados de la tabla EMPLEADOS_NUEVO que todavía no formen parte de ella (por ejemplo, la empleada Carmen insertada en el anterior ejercicio, ya forma parte). Como estos nuevos empleados todavía no tienen asignado de forma definitiva un departamento de trabajo, cree previamente un nuevo departamento de nombre TEMPORAL y código 0, y asigne a los empleados nuevos en este departamento, con la fecha de alta del día actual. -->
+
+START TRANSACTION;
+<!-- crear departamento TEMPORAL -->
+INSERT INTO departamentos (DEPT_NO, NOMBRE) VALUES (0, "TEMPORAL");
+COMMIT;
+<!-- insertar los valores de empleados_nuevos a la tabla empleados -->
+START TRANSACTION;
+INSERT INTO empleados (EMP_NO, NOMBRE, SALARIO, DEPT_NO, ALTA)
+SELECT en.EMP_NO, en.NOMBRE, en.SALARIO, 0, CURDATE()
+FROM EMPLEADOS_NUEVOS en
+LEFT JOIN EMPLEADOS e
+ON e.EMP_NO = en.EMP_NO
+WHERE e.EMP_NO IS NULL;
+COMMIT;
+
+<!-- 7) Hay un empleado que se ha trasladado de otra fábrica, y debe ser dado de alta inmediatamente en la tabla EMPLEADOS de la base de datos. La información que se dispone de este empleado es que se llama 'David', que tiene el código de empleado 1579, y que trabajará en el departamento 10, con el mismo oficio que PEPE. -->
+
+START TRANSACTION;
+INSERT INTO EMPLEADOS (EMP_NO, DEPT_NO, NOMBRE) VALUES (1579, 10, "DAVID");
+UPDATE EMPLEADOS 
+SET OFICIO = (SELECT OFICIO
+			FROM (SELECT OFICIO FROM EMPLEADOS E
+			WHERE E.NOMBRE = "PEPE") AS C)
+WHERE NOMBRE = "DAVID";
+COMMIT;
+
+
+
+
+
+
+
+
+
+
+
+
